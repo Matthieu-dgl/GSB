@@ -1,114 +1,85 @@
 package com.matthieudeglon.gsb;
 
-import android.content.Intent;
-import android.os.AsyncTask;
+import androidx.appcompat.app.AppCompatActivity;
+import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import androidx.appcompat.app.AppCompatActivity;
-
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
+import java.util.HashMap;
+import java.util.Map;
 public class LoginActivity extends AppCompatActivity {
-
-    private EditText editTextEmail, editTextPassword;
-    private Button buttonLogin;
-
+    EditText username, password;
+    Button login;
+    ProgressDialog progressDialog;
+    RequestQueue requestQueue;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-        editTextEmail = findViewById(R.id.editTextEmail);
-        editTextPassword = findViewById(R.id.editTextPassword);
-        buttonLogin = findViewById(R.id.buttonLogin);
-
-        buttonLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String email = editTextEmail.getText().toString().trim();
-                String password = editTextPassword.getText().toString().trim();
-
-                new LoginTask().execute(email, password);
+        username = findViewById(R.id.editTextEmail);
+        password = findViewById(R.id.editTextPassword);
+        login = findViewById(R.id.buttonLogin);
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Logging in... Please wait.");
+        progressDialog.setCancelable(false);
+        requestQueue = Volley.newRequestQueue(this);
+        login.setOnClickListener(v -> {
+            String userVar = username.getText().toString();
+            String passVar = password.getText().toString();
+            if (userVar.isEmpty()) {
+                Toast.makeText(getApplicationContext(), "Username cannot be blank",
+                        Toast.LENGTH_SHORT).show();
+            } else if (passVar.isEmpty()) {
+                Toast.makeText(getApplicationContext(), "Password cannot be blank",
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                loginRequest(userVar, passVar);
             }
         });
     }
-
-    private class LoginTask extends AsyncTask<String, Void, JSONObject> {
-
-        @Override
-        protected JSONObject doInBackground(String... params) {
-            String email = params[0];
-            String password = params[1];
-
-            try {
-                URL url = new URL("https://matthieudeglon.com/AppCR-GSB-main-2/Apis/ApiLogin.php");
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("POST");
-                connection.setRequestProperty("Content-Type", "application/json");
-                connection.setDoOutput(true);
-
-                JSONObject jsonParam = new JSONObject();
-                jsonParam.put("email", email);
-                jsonParam.put("password", password);
-
-                OutputStream outputStream = connection.getOutputStream();
-                outputStream.write(jsonParam.toString().getBytes());
-                outputStream.flush();
-                outputStream.close();
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                StringBuilder response = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
-                reader.close();
-
-                Log.d("LoginActivity", "Response: " + response.toString());
-                return new JSONObject(response.toString());
-
-            } catch (IOException | JSONException e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(JSONObject result) {
-            if (result != null) {
-                try {
-                    int status = result.getInt("status");
-                    if (status == 200) {
-                        JSONObject user = result.getJSONObject("user");
-                        String token = result.getString("token");
-
-                        Intent intent = new Intent(LoginActivity.this, UserDetailsActivity.class);
-                        startActivity(intent);
-                        finish();
-                    } else {
-                        String message = result.getString("message");
-                        Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
+    private void loginRequest(String userVar, String passVar) {
+        String loginUrl = "https://matthieudeglon.com/AppCR-GSB-main-2/Apis/ApiLogin.php";
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, loginUrl,
+                response -> {
+                    progressDialog.dismiss();
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        int status = jsonObject.getInt("status");
+                        if (status == 200) { // Success
+                            Toast.makeText(LoginActivity.this, "Login successful",
+                                    Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(LoginActivity.this, "Incorrect username or password",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(LoginActivity.this, "Failed to parse server response",
+                                Toast.LENGTH_LONG).show();
                     }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                Toast.makeText(LoginActivity.this, "Erreur lors de la connexion", Toast.LENGTH_SHORT).show();
+                },
+                error -> {
+                    progressDialog.dismiss();
+                    Toast.makeText(LoginActivity.this, "Failed to connect to server. Please check your internet connection and try again.", Toast.LENGTH_LONG).show();
+                }) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("email", userVar);
+                params.put("password", passVar);
+                return params;
             }
-        }
+        };
+        progressDialog.show();
+        requestQueue.add(stringRequest);
     }
 }
