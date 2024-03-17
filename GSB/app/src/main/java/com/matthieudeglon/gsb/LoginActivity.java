@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.content.Intent;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -36,7 +37,7 @@ public class LoginActivity extends AppCompatActivity {
             String userVar = username.getText().toString();
             String passVar = password.getText().toString();
             if (userVar.isEmpty()) {
-                Toast.makeText(getApplicationContext(), "Username cannot be blank",
+                Toast.makeText(getApplicationContext(), "Email cannot be blank",
                         Toast.LENGTH_SHORT).show();
             } else if (passVar.isEmpty()) {
                 Toast.makeText(getApplicationContext(), "Password cannot be blank",
@@ -54,11 +55,15 @@ public class LoginActivity extends AppCompatActivity {
                     try {
                         JSONObject jsonObject = new JSONObject(response);
                         int status = jsonObject.getInt("status");
-                        if (status == 200) { // Success
+                        if (status == 200) {
                             Toast.makeText(LoginActivity.this, "Login successful",
                                     Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(LoginActivity.this, UserDetailsActivity.class);
+                            intent.putExtra("email", userVar);
+                            startActivity(intent);
+                            finish();
                         } else {
-                            Toast.makeText(LoginActivity.this, "Incorrect username or password",
+                            Toast.makeText(LoginActivity.this, "Incorrect email or password",
                                     Toast.LENGTH_LONG).show();
                         }
                     } catch (JSONException e) {

@@ -1,13 +1,26 @@
 package com.matthieudeglon.gsb;
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.widget.TextView;
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class UserDetailsActivity extends AppCompatActivity {
 
     private TextView textViewUsername;
+    private TextView textViewNom;
+    private TextView textViewPrenom;
+    private TextView textViewType;
+    private TextView textViewRegion;
+    private TextView textViewTimestamp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -15,14 +28,39 @@ public class UserDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_user_details);
 
         textViewUsername = findViewById(R.id.textViewUsername);
+        textViewNom = findViewById(R.id.textViewNom);
+        textViewPrenom = findViewById(R.id.textViewPrenom);
+        textViewType = findViewById(R.id.textViewType);
+        textViewRegion = findViewById(R.id.textViewRegion);
+        textViewTimestamp = findViewById(R.id.textViewTimestamp);
 
-        // Ici, vous récupéreriez les informations de l'utilisateur depuis l'API "GSB"
-        // et les afficheriez sur cette activité
-        displayUserInfo("John Doe"); // Exemple de nom d'utilisateur pour la démonstration
-    }
+        String userDataJsonString = getIntent().getStringExtra("userDataJsonString");
 
-    private void displayUserInfo(String username) {
-        textViewUsername.setText(username);
-        // Ici, vous afficheriez d'autres informations de l'utilisateur
+        try {
+            JSONObject userDataJson = new JSONObject(userDataJsonString);
+
+            JSONObject user = userDataJson.getJSONObject("user");
+            String username = user.getString("Email");
+            String nom = user.getString("Nom");
+            String prenom = user.getString("Prenom");
+            String type = user.getString("Type");
+            String region = user.getString("Region");
+            String timestamp = user.getString("TimeStamp");
+
+            textViewUsername.setText("Email: " + username);
+            textViewNom.setText("Nom: " + nom);
+            textViewPrenom.setText("Prénom: " + prenom);
+            textViewType.setText("Type: " + type);
+            textViewRegion.setText("Région: " + region);
+            textViewTimestamp.setText("Timestamp: " + timestamp);
+
+            // Correction : passer les données utilisateur à l'activité suivante
+            Intent intent = new Intent(UserDetailsActivity.this, LoginActivity.class);
+            intent.putExtra("userData", user.toString()); // Passage du JSON de l'utilisateur
+            startActivity(intent);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }
