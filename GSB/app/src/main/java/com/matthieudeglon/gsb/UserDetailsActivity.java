@@ -54,9 +54,8 @@ public class UserDetailsActivity extends AppCompatActivity {
             textViewRegion.setText("Région: " + region);
             textViewTimestamp.setText("Timestamp: " + timestamp);
 
-            // Correction : passer les données utilisateur à l'activité suivante
             Intent intent = new Intent(UserDetailsActivity.this, LoginActivity.class);
-            intent.putExtra("userData", user.toString()); // Passage du JSON de l'utilisateur
+            intent.putExtra("userData", user.toString());
             startActivity(intent);
 
         } catch (JSONException e) {
