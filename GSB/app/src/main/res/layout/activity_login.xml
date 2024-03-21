@@ -59,4 +59,12 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.811" />
 
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="119dp"
+        android:layout_height="196dp"
+        app:srcCompat="@drawable/capture_d_cran_2024_03_21___14_29_44"
+        tools:layout_editor_absoluteX="146dp"
+        tools:layout_editor_absoluteY="76dp" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
