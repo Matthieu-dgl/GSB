@@ -15,51 +15,30 @@ import org.json.JSONObject;
 
 public class UserDetailsActivity extends AppCompatActivity {
 
-    private TextView textViewUsername;
-    private TextView textViewNom;
-    private TextView textViewPrenom;
-    private TextView textViewType;
-    private TextView textViewRegion;
-    private TextView textViewTimestamp;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_details);
 
-        textViewUsername = findViewById(R.id.textViewUsername);
-        textViewNom = findViewById(R.id.textViewNom);
-        textViewPrenom = findViewById(R.id.textViewPrenom);
-        textViewType = findViewById(R.id.textViewType);
-        textViewRegion = findViewById(R.id.textViewRegion);
-        textViewTimestamp = findViewById(R.id.textViewTimestamp);
+        Intent intent = getIntent();
+        String userEmail = intent.getStringExtra("user_email");
+        String userName = intent.getStringExtra("user_name");
+        String userSurname = intent.getStringExtra("user_surname");
+        String userRegion = intent.getStringExtra("user_region");
+        String userType = intent.getStringExtra("user_type");
+        String userLastco = intent.getStringExtra("user_time");
 
-        String userDataJsonString = getIntent().getStringExtra("userDataJsonString");
-
-        try {
-            JSONObject userDataJson = new JSONObject(userDataJsonString);
-
-            JSONObject user = userDataJson.getJSONObject("user");
-            String username = user.getString("Email");
-            String nom = user.getString("Nom");
-            String prenom = user.getString("Prenom");
-            String type = user.getString("Type");
-            String region = user.getString("Region");
-            String timestamp = user.getString("TimeStamp");
-
-            textViewUsername.setText("Email: " + username);
-            textViewNom.setText("Nom: " + nom);
-            textViewPrenom.setText("Prénom: " + prenom);
-            textViewType.setText("Type: " + type);
-            textViewRegion.setText("Région: " + region);
-            textViewTimestamp.setText("Timestamp: " + timestamp);
-
-            Intent intent = new Intent(UserDetailsActivity.this, LoginActivity.class);
-            intent.putExtra("userData", user.toString());
-            startActivity(intent);
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        TextView emailTextView = findViewById(R.id.InfoEmail);
+        TextView nameTextView = findViewById(R.id.InfoName);
+        TextView surnameTextView = findViewById(R.id.InfoSurname);
+        TextView regionTextView = findViewById(R.id.InfoRegion);
+        TextView typeTextView = findViewById(R.id.InfoType);
+        TextView timeTextView = findViewById(R.id.InfoLastCo);
+        emailTextView.setText(userEmail);
+        nameTextView.setText(userName);
+        surnameTextView.setText(userSurname);
+        regionTextView.setText(userRegion);
+        typeTextView.setText(userType);
+        timeTextView.setText(userLastco);
     }
 }
